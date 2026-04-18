@@ -10,7 +10,7 @@ Analyze linguistic topologies, verify source reputations, and detect clickbait m
 
 **Verify the Truth in Milliseconds.** InfoVerify is a high-performance, frontend web application designed to simulate advanced Natural Language Processing (NLP) and source-verification to detect clickbait, fabricated news, and phishing threats.
 
-🌐 **[Live Demo](https://Jrajimman12.github.io/InfoVerify)**
+🌐 **[Live Demo](https://jrajimman12.github.io/infoverify.app/)**
 
 ---
 
