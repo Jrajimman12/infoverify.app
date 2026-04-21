@@ -473,69 +473,118 @@
         });
 
         // --- ALGORITHM WITH GIBBERISH DETECTION ---
-        const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com'];
-        const satiricalDomains = ['theonion.com', 'babylonbee.com', 'clickhole.com'];
-        const negativeWords = ["shocking", "destroy", "hidden", "secret", "outrage", "miracle", "slams", "banned", "unbelievable", "hoax", "conspiracy"];
-        const positiveWords = ["reports", "stated", "officials", "according", "announced", "data", "investigation"];
-
-        function generateStringHash(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-            return Math.abs(hash);
-        }
+// --- ADVANCED HEURISTIC DETECTION ENGINE v2.0 ---
         
+        // 1. Domain & TLD Power Rankings
+        const tldWeights = { 
+            '.gov': 35, '.edu': 30, '.org': 10, '.int': 20, 
+            '.com': 0, '.net': 0, '.in': 0, '.co.uk': 5,
+            '.co': -10, '.info': -15, '.biz': -20, '.xyz': -35, '.top': -35, '.click': -40 
+        };
+        const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int'];
+        const satiricalDomains = ['theonion.com', 'babylonbee.com', 'clickhole.com', 'waterfordwhispersnews.com'];
+        const urlShorteners = ['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd'];
+
+        // 2. Advanced NLP Lexicon Matrices
+        const lexicons = {
+            clickbait: ["you won't believe", "shocking", "this one trick", "what happens next", "mind-blowing", "secret", "they don't want you to know"],
+            urgency: ["act now", "hurry", "limited time", "before it's deleted", "warning", "urgent", "breaking", "alert"],
+            subjective: ["terrible", "outrageous", "disgusting", "best", "worst", "absolute", "destroys", "slams", "humiliates", "owned"],
+            objective: ["reports", "stated", "officials", "according to", "announced", "data shows", "investigation", "published", "researchers"]
+        };
+
+        function extractDomainData(urlInput) {
+            // Clean the input and try to parse it as a real URL
+            let cleanedUrl = urlInput.trim().toLowerCase();
+            if (!cleanedUrl.startsWith('http')) cleanedUrl = 'http://' + cleanedUrl;
+            
+            try {
+                const urlObj = new URL(cleanedUrl);
+                const hostname = urlObj.hostname.replace('www.', '');
+                // Extract TLD (e.g., from sub.domain.co.uk -> .co.uk)
+                const tldMatch = hostname.match(/\.[a-z]+(\.[a-z]+)?$/);
+                const tld = tldMatch ? tldMatch[0] : '';
+                return { hostname, tld, valid: true };
+            } catch (e) {
+                return { hostname: urlInput, tld: '', valid: false }; // Fallback if parsing fails
+            }
+        }
+
         function startAnalysis() {
             const headline = document.getElementById("headlineInput").value.trim();
-            const source = document.getElementById("sourceInput").value.trim().toLowerCase();
+            const source = document.getElementById("sourceInput").value.trim();
             if (!headline) { alert("Please enter a headline to analyze."); return; }
 
             document.getElementById("analyzeBtn").style.display = "none";
             document.getElementById("results").style.display = "none";
             document.getElementById("loader").style.display = "block";
             
-            let loadSteps = ["Extracting Typography...", "Validating Input Syntax...", "Hashing Vectors...", "Calculating Trust Metrics..."];
+            let loadSteps = ["Extracting URL Topology...", "Parsing TLD Weights...", "Running NLP Matrices...", "Finalizing Verdict..."];
             let step = 0;
-            let interval = setInterval(() => { if(step < loadSteps.length) { document.getElementById("loadingText").innerText = loadSteps[step]; step++; } }, 500);
+            let interval = setInterval(() => { if(step < loadSteps.length) { document.getElementById("loadingText").innerText = loadSteps[step]; step++; } }, 400);
 
-            setTimeout(() => { clearInterval(interval); processAlgorithm(headline, source); }, 2200);
+            setTimeout(() => { clearInterval(interval); processAlgorithm(headline, source); }, 1800);
         }
 
-        function processAlgorithm(headline, source) {
+        function processAlgorithm(headline, sourceUrl) {
             const lowerHead = headline.toLowerCase();
             const words = lowerHead.split(/\s+/).filter(w => w.length > 0);
+            
+            // Phase 1: Gibberish & Data Integrity Check
             if (words.length < 3 || lowerHead.length < 12) {
                 renderResults(0, 10, 0, 0, "Insufficient Data / Gibberish");
                 return;
             }
 
-            const stringHash = generateStringHash(lowerHead + source);
-            const sourceVariance = (stringHash % 20) - 10;
-            const lingVariance = ((stringHash >> 2) % 30) - 15;
-            const formVariance = ((stringHash >> 4) % 20) - 10;
-
-            let sourceScore = 60 + sourceVariance; 
-            let lingScore = 80 + lingVariance; 
-            let formScore = 90 + formVariance;
-
-            let foundTrusted = trustedDomains.some(domain => source.includes(domain));
-            let foundSatire = satiricalDomains.some(domain => source.includes(domain));
+            // Phase 2: Source Verification & Link Power
+            let sourceScore = 50; // Base neutral score
+            const domainData = extractDomainData(sourceUrl);
             
-            if (foundTrusted) sourceScore = 90 + (stringHash % 10);
-            else if (foundSatire) sourceScore = 15; 
-            else if (!source) sourceScore = 25; 
+            if (domainData.valid) {
+                // Apply TLD Weight (e.g., .edu boosts, .xyz drops)
+                if (tldWeights[domainData.tld]) sourceScore += tldWeights[domainData.tld];
+                
+                // Direct Domain Overrides
+                if (trustedDomains.includes(domainData.hostname)) sourceScore = 95;
+                if (satiricalDomains.includes(domainData.hostname)) sourceScore = 15;
+                if (urlShorteners.includes(domainData.hostname)) sourceScore = 20; // Shorteners hide the true destination
+            } else if (!sourceUrl) {
+                sourceScore = 25; // No source provided
+            }
 
-            negativeWords.forEach(word => { if (lowerHead.includes(word)) lingScore -= 25; });
-            positiveWords.forEach(word => { if (lowerHead.includes(word)) lingScore += 15; });
-            if (/(!!+|\?\?+)/.test(headline)) formScore -= 35; 
-            let capsCount = words.filter(w => w === w.toUpperCase() && w.length > 3).length;
+            // Phase 3: Linguistic Neutrality (NLP)
+            let lingScore = 75; // Base neutral score
+            
+            lexicons.clickbait.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 20; });
+            lexicons.urgency.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 10; });
+            lexicons.subjective.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 15; });
+            lexicons.objective.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore += 10; });
+
+            // Phase 4: Formatting Standards
+            let formScore = 90; // Assume good formatting initially
+            
+            // Check for excessive punctuation screaming
+            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) formScore -= 25; 
+            if (/\$[0-9]+/.test(headline) && lowerHead.includes("make")) formScore -= 30; // "Make $1000" spam format
+            
+            // Check for ALL CAPS (more than 2 full uppercase words > 3 letters)
+            let capsCount = headline.split(/\s+/).filter(w => w === w.toUpperCase() && w.replace(/[^A-Z]/g, '').length > 3).length;
             if (capsCount > 1) formScore -= (capsCount * 12);
-            
+
+            // Bound scores between 5 and 98 to look realistic
             sourceScore = Math.max(5, Math.min(98, sourceScore));
             lingScore = Math.max(5, Math.min(98, lingScore));
             formScore = Math.max(5, Math.min(98, formScore));
 
+            // Weight the final score
             let finalTrustScore = Math.round((sourceScore * 0.45) + (lingScore * 0.35) + (formScore * 0.20));
-            renderResults(finalTrustScore, sourceScore, lingScore, formScore, null);
+            
+            // Override verdict if satire is detected
+            let customVerdict = null;
+            if (satiricalDomains.includes(domainData.hostname)) customVerdict = "Known Satire / Parody";
+            else if (urlShorteners.includes(domainData.hostname)) customVerdict = "Masked URL (High Risk)";
+
+            renderResults(finalTrustScore, sourceScore, lingScore, formScore, customVerdict);
         }
 
         function renderResults(final, source, ling, form, customVerdict) {
@@ -565,10 +614,11 @@
             card.style.color = bgColor;
             card.style.borderColor = `rgba(${hexToRgb(bgColor)}, 0.4)`;
 
-            if (customVerdict) { verdict.innerText = customVerdict; } 
-            else {
+            if (customVerdict) { 
+                verdict.innerText = customVerdict; 
+            } else {
                 if (final >= 75) verdict.innerText = "Highly Credible";
-                else if (final >= 40) verdict.innerText = "Proceed with Caution";
+                else if (final >= 45) verdict.innerText = "Proceed with Caution";
                 else verdict.innerText = "Likely Fabricated / Clickbait";
             }
         }
@@ -581,7 +631,7 @@
 
         function getColor(score) {
             if (score >= 75) return "#06d6a0"; 
-            if (score >= 40) return "#f77f00"; 
+            if (score >= 45) return "#f77f00"; 
             return "#ef233c"; 
         }
 
