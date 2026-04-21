@@ -107,11 +107,17 @@
         .progress-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 100px; overflow: hidden; }
         .progress-bar { height: 100%; border-radius: 100px; width: 0%; transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
 
-        /* --- EXPLAINABLE AI REASONING LOG --- */
-        .reasoning-box { margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 14px; line-height: 1.6; display: none; }
-        .reasoning-box h4 { margin-bottom: 12px; color: #d1d1d6; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
-        .log-item { display: flex; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
-        .log-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        /* --- EXPLAINABLE AI REASONING LOG (COLLAPSIBLE) --- */
+        .reasoning-box { margin-top: 25px; padding: 0; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 14px; line-height: 1.6; display: none; overflow: hidden; }
+        .reasoning-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(255,255,255,0.02); transition: background 0.3s; }
+        .reasoning-header:hover { background: rgba(255,255,255,0.05); }
+        .reasoning-header h4 { margin: 0; color: #d1d1d6; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .reasoning-header i.toggle-icon { transition: transform 0.3s ease; }
+        .reasoning-header.open i.toggle-icon { transform: rotate(180deg); }
+        
+        #reasoningList { display: none; padding: 0 20px 20px 20px; border-top: 1px solid var(--border-glass); }
+        .log-item { display: flex; gap: 10px; margin-bottom: 10px; padding-top: 10px; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .log-item:last-child { margin-bottom: 0; border-bottom: none; }
         .log-icon.positive { color: var(--safe); }
         .log-icon.negative { color: var(--danger); }
         .log-icon.warning, .log-icon.neutral { color: var(--warning); }
@@ -166,13 +172,12 @@
             background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); 
             padding: 12px 24px; border-radius: 100px; display: flex; align-items: center; gap: 10px; 
             cursor: pointer; position: relative; overflow: hidden;
-            transform-origin: center; /* Forces scaling from the dead center */
+            transform-origin: center;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .credit-badge span { color: var(--text-main); font-weight: 600; transition: color 0.3s; }
         .credit-badge i { color: var(--accent-primary); font-size: 14px; transition: transform 0.3s; }
         
-        /* Removed translateY to prevent it expanding "upwards" */
         .credit-badge:hover, .credit-badge.active-badge { 
             transform: scale(1.15); 
             background: rgba(255, 255, 255, 0.1); 
@@ -195,7 +200,7 @@
         }
 
         .inline-team-details.active {
-            max-height: 400px; /* Expands smoothly */
+            max-height: 400px;
             opacity: 1;
             margin-top: 40px;
         }
@@ -279,7 +284,10 @@
                     </div>
                     
                     <div class="reasoning-box" id="reasoningLogBox">
-                        <h4><i class="fa-solid fa-microchip"></i> System Audit Trail</h4>
+                        <div class="reasoning-header" id="reasoningHeader" onclick="toggleAuditLog()">
+                            <h4><i class="fa-solid fa-microchip"></i> System Audit Trail</h4>
+                            <i class="fa-solid fa-chevron-down toggle-icon" id="auditToggleIcon"></i>
+                        </div>
                         <div id="reasoningList"></div>
                     </div>
                 </div>
@@ -419,37 +427,30 @@
             const container = document.getElementById('inlineTeamDetails');
             const badges = document.querySelectorAll('.credit-badge');
             
-            // Remove active state from all badges
             badges.forEach(b => b.classList.remove('active-badge'));
 
             if (activeMember === member) {
-                // If clicking the same badge, close the panel
                 container.classList.remove('active');
                 activeMember = null;
                 return;
             }
 
-            // Populate Data
             const data = teamData[member];
             document.getElementById('teamAvatarIcon').className = `fa-solid ${data.icon}`;
             document.getElementById('teamName').innerText = data.name;
             document.getElementById('teamRole').innerText = `< ${data.role} />`;
             document.getElementById('teamDesc').innerText = data.desc;
             
-            // Highlight current badge
             document.getElementById(`badge-${member}`).classList.add('active-badge');
-            
-            // Open Panel
             container.classList.add('active');
             activeMember = member;
 
-            // Scroll down smoothly so the expanded info is clearly visible
             setTimeout(() => {
                 container.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 150);
         }
 
-        // --- WATCHER TOY LOGIC (Tracks Mouse) ---
+        // --- WATCHER TOY LOGIC ---
         document.addEventListener('mousemove', (e) => {
             const pupils = document.querySelectorAll('.watcher-pupil');
             const head = document.getElementById('watcherHead');
@@ -486,13 +487,35 @@
             document.getElementById('successMessage').style.display = 'block';
         });
 
+        // --- KEYBOARD SHORTCUT LOGIC ---
+        document.getElementById('headlineInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent standard new line
+                startAnalysis(); // Trigger the scan instantly
+            }
+        });
+
+        // --- COLLAPSIBLE AUDIT LOG TOGGLE ---
+        function toggleAuditLog() {
+            const list = document.getElementById("reasoningList");
+            const header = document.getElementById("reasoningHeader");
+            if (list.style.display === "none" || list.style.display === "") {
+                list.style.display = "block";
+                header.classList.add("open");
+            } else {
+                list.style.display = "none";
+                header.classList.remove("open");
+            }
+        }
+
+
         // --- ADVANCED HEURISTIC DETECTION ENGINE v2.0 ---
         
-        // 1. Domain & TLD Power Rankings (Updated with .ac.in and .in)
+        // 1. Domain & TLD Power Rankings (Updated .in to Top Tier, .xyz to Middle)
         const tldWeights = { 
-            '.gov': 35, '.edu': 30, '.ac.in': 30, '.org': 10, '.int': 20, 
-            '.com': 0, '.net': 0, '.in': 5, '.co.uk': 5,
-            '.co': -10, '.info': -15, '.biz': -20, '.xyz': -35, '.top': -35, '.click': -40 
+            '.gov': 35, '.edu': 30, '.ac.in': 30, '.in': 30, '.org': 10, '.int': 20, 
+            '.com': 0, '.net': 0, '.co.uk': 5, '.xyz': 0, 
+            '.co': -10, '.info': -15, '.biz': -20, '.top': -35, '.click': -40 
         };
         const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int'];
         const satiricalDomains = ['theonion.com', 'babylonbee.com', 'clickhole.com', 'waterfordwhispersnews.com'];
@@ -529,6 +552,11 @@
             document.getElementById("analyzeBtn").style.display = "none";
             document.getElementById("results").style.display = "none";
             document.getElementById("reasoningLogBox").style.display = "none";
+            
+            // Auto-collapse the audit log for the new scan
+            document.getElementById("reasoningList").style.display = "none";
+            document.getElementById("reasoningHeader").classList.remove("open");
+
             document.getElementById("loader").style.display = "block";
             
             let loadSteps = ["Extracting URL Topology...", "Parsing TLD Weights...", "Running NLP Matrices...", "Finalizing Verdict..."];
@@ -541,24 +569,23 @@
         function processAlgorithm(headline, sourceUrl) {
             const lowerHead = headline.toLowerCase();
             const words = lowerHead.split(/\s+/).filter(w => w.length > 0);
-            let auditLog = []; // The brain's memory tracker
+            let auditLog = []; 
             
-            // Phase 1: Gibberish Check
             if (words.length < 3 || lowerHead.length < 12) {
                 auditLog.push({ type: 'negative', text: 'Input flagged as insufficient data or gibberish.' });
                 renderResults(0, 10, 0, 0, "Insufficient Data", auditLog);
                 return;
             }
 
-            // Phase 2: Source Verification
             let sourceScore = 50; 
             const domainData = extractDomainData(sourceUrl);
             
             if (domainData.valid) {
-                if (tldWeights[domainData.tld]) {
+                if (tldWeights[domainData.tld] !== undefined) {
                     sourceScore += tldWeights[domainData.tld];
                     if (tldWeights[domainData.tld] > 0) auditLog.push({ type: 'positive', text: `Domain TLD (${domainData.tld}) recognized as structurally authoritative.` });
-                    else auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with low-quality or spam networks.` });
+                    else if (tldWeights[domainData.tld] < 0) auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with low-quality or spam networks.` });
+                    else auditLog.push({ type: 'neutral', text: `Domain TLD (${domainData.tld}) is recognized as a standard neutral domain.` });
                 }
                 
                 if (trustedDomains.includes(domainData.hostname)) {
@@ -570,7 +597,7 @@
                 } else if (urlShorteners.includes(domainData.hostname)) {
                     sourceScore = 20;
                     auditLog.push({ type: 'negative', text: 'URL shortener detected. True destination is masked.' });
-                } else {
+                } else if (tldWeights[domainData.tld] === undefined) {
                     auditLog.push({ type: 'neutral', text: 'Source domain is unverified in the global ledger. Neutral score applied.' });
                 }
             } else if (!sourceUrl) {
@@ -578,7 +605,6 @@
                 auditLog.push({ type: 'negative', text: 'No source URL provided for verification.' });
             }
 
-            // Phase 3: Linguistic NLP Matrices
             let lingScore = 75; 
             let foundClickbait = false, foundUrgency = false, foundSubj = false, foundObj = false;
 
@@ -592,7 +618,6 @@
             if (foundSubj) auditLog.push({ type: 'warning', text: 'High volume of subjective or highly emotional adjectives detected.' });
             if (foundObj) auditLog.push({ type: 'positive', text: 'Detected objective, data-driven, or formal reporting terminology.' });
 
-            // Phase 4: Formatting Standards
             let formScore = 90; 
             if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) {
                 formScore -= 25;
@@ -609,7 +634,6 @@
                 auditLog.push({ type: 'negative', text: 'Excessive capitalization (shouting) detected.' });
             }
 
-            // Calculate and Render
             sourceScore = Math.max(5, Math.min(98, sourceScore));
             lingScore = Math.max(5, Math.min(98, lingScore));
             formScore = Math.max(5, Math.min(98, formScore));
@@ -661,12 +685,12 @@
             // --- RENDER THE AUDIT LOG ---
             const logBox = document.getElementById("reasoningLogBox");
             const logList = document.getElementById("reasoningList");
-            logList.innerHTML = ""; // Clear old logs
+            logList.innerHTML = ""; 
             
             if (auditLog && auditLog.length > 0) {
                 logBox.style.display = "block";
                 auditLog.forEach(log => {
-                    let iconClass = "fa-circle-info neutral"; // default
+                    let iconClass = "fa-circle-info neutral"; 
                     if (log.type === 'positive') iconClass = "fa-circle-check positive";
                     if (log.type === 'negative') iconClass = "fa-circle-xmark negative";
                     if (log.type === 'warning') iconClass = "fa-triangle-exclamation warning";
