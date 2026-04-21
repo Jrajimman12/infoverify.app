@@ -107,6 +107,15 @@
         .progress-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 100px; overflow: hidden; }
         .progress-bar { height: 100%; border-radius: 100px; width: 0%; transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1); position: relative; }
 
+        /* --- EXPLAINABLE AI REASONING LOG --- */
+        .reasoning-box { margin-top: 25px; padding: 20px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--border-glass); border-radius: 12px; font-size: 14px; line-height: 1.6; display: none; }
+        .reasoning-box h4 { margin-bottom: 12px; color: #d1d1d6; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .log-item { display: flex; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+        .log-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .log-icon.positive { color: var(--safe); }
+        .log-icon.negative { color: var(--danger); }
+        .log-icon.warning, .log-icon.neutral { color: var(--warning); }
+
         /* --- HOW IT WORKS --- */
         #how-it-works { background: linear-gradient(180deg, transparent, rgba(67, 97, 238, 0.05), transparent); border-top: 1px solid rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.02); width: 100%; }
         .section-title { font-size: 36px; font-weight: 800; margin-bottom: 60px; text-align: center;}
@@ -267,6 +276,11 @@
                     <div class="breakdown-item">
                         <div class="breakdown-header"><span>Formatting Standards Analysis</span><span id="formScoreTxt">--</span></div>
                         <div class="progress-bg"><div class="progress-bar" id="formBar"></div></div>
+                    </div>
+                    
+                    <div class="reasoning-box" id="reasoningLogBox">
+                        <h4><i class="fa-solid fa-microchip"></i> System Audit Trail</h4>
+                        <div id="reasoningList"></div>
                     </div>
                 </div>
             </div>
@@ -472,13 +486,12 @@
             document.getElementById('successMessage').style.display = 'block';
         });
 
-        // --- ALGORITHM WITH GIBBERISH DETECTION ---
-// --- ADVANCED HEURISTIC DETECTION ENGINE v2.0 ---
+        // --- ADVANCED HEURISTIC DETECTION ENGINE v2.0 ---
         
-        // 1. Domain & TLD Power Rankings
+        // 1. Domain & TLD Power Rankings (Updated with .ac.in and .in)
         const tldWeights = { 
-            '.gov': 35, '.edu': 30, '.org': 10, '.int': 20, 
-            '.com': 0, '.net': 0, '.in': 0, '.co.uk': 5,
+            '.gov': 35, '.edu': 30, '.ac.in': 30, '.org': 10, '.int': 20, 
+            '.com': 0, '.net': 0, '.in': 5, '.co.uk': 5,
             '.co': -10, '.info': -15, '.biz': -20, '.xyz': -35, '.top': -35, '.click': -40 
         };
         const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int'];
@@ -494,19 +507,17 @@
         };
 
         function extractDomainData(urlInput) {
-            // Clean the input and try to parse it as a real URL
             let cleanedUrl = urlInput.trim().toLowerCase();
             if (!cleanedUrl.startsWith('http')) cleanedUrl = 'http://' + cleanedUrl;
             
             try {
                 const urlObj = new URL(cleanedUrl);
                 const hostname = urlObj.hostname.replace('www.', '');
-                // Extract TLD (e.g., from sub.domain.co.uk -> .co.uk)
                 const tldMatch = hostname.match(/\.[a-z]+(\.[a-z]+)?$/);
                 const tld = tldMatch ? tldMatch[0] : '';
                 return { hostname, tld, valid: true };
             } catch (e) {
-                return { hostname: urlInput, tld: '', valid: false }; // Fallback if parsing fails
+                return { hostname: urlInput, tld: '', valid: false };
             }
         }
 
@@ -517,6 +528,7 @@
 
             document.getElementById("analyzeBtn").style.display = "none";
             document.getElementById("results").style.display = "none";
+            document.getElementById("reasoningLogBox").style.display = "none";
             document.getElementById("loader").style.display = "block";
             
             let loadSteps = ["Extracting URL Topology...", "Parsing TLD Weights...", "Running NLP Matrices...", "Finalizing Verdict..."];
@@ -529,65 +541,89 @@
         function processAlgorithm(headline, sourceUrl) {
             const lowerHead = headline.toLowerCase();
             const words = lowerHead.split(/\s+/).filter(w => w.length > 0);
+            let auditLog = []; // The brain's memory tracker
             
-            // Phase 1: Gibberish & Data Integrity Check
+            // Phase 1: Gibberish Check
             if (words.length < 3 || lowerHead.length < 12) {
-                renderResults(0, 10, 0, 0, "Insufficient Data / Gibberish");
+                auditLog.push({ type: 'negative', text: 'Input flagged as insufficient data or gibberish.' });
+                renderResults(0, 10, 0, 0, "Insufficient Data", auditLog);
                 return;
             }
 
-            // Phase 2: Source Verification & Link Power
-            let sourceScore = 50; // Base neutral score
+            // Phase 2: Source Verification
+            let sourceScore = 50; 
             const domainData = extractDomainData(sourceUrl);
             
             if (domainData.valid) {
-                // Apply TLD Weight (e.g., .edu boosts, .xyz drops)
-                if (tldWeights[domainData.tld]) sourceScore += tldWeights[domainData.tld];
+                if (tldWeights[domainData.tld]) {
+                    sourceScore += tldWeights[domainData.tld];
+                    if (tldWeights[domainData.tld] > 0) auditLog.push({ type: 'positive', text: `Domain TLD (${domainData.tld}) recognized as structurally authoritative.` });
+                    else auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with low-quality or spam networks.` });
+                }
                 
-                // Direct Domain Overrides
-                if (trustedDomains.includes(domainData.hostname)) sourceScore = 95;
-                if (satiricalDomains.includes(domainData.hostname)) sourceScore = 15;
-                if (urlShorteners.includes(domainData.hostname)) sourceScore = 20; // Shorteners hide the true destination
+                if (trustedDomains.includes(domainData.hostname)) {
+                    sourceScore = 95;
+                    auditLog.push({ type: 'positive', text: 'Source verified against the Global Trusted Ledger.' });
+                } else if (satiricalDomains.includes(domainData.hostname)) {
+                    sourceScore = 15;
+                    auditLog.push({ type: 'neutral', text: 'Source identified as a known Satire/Parody network.' });
+                } else if (urlShorteners.includes(domainData.hostname)) {
+                    sourceScore = 20;
+                    auditLog.push({ type: 'negative', text: 'URL shortener detected. True destination is masked.' });
+                } else {
+                    auditLog.push({ type: 'neutral', text: 'Source domain is unverified in the global ledger. Neutral score applied.' });
+                }
             } else if (!sourceUrl) {
-                sourceScore = 25; // No source provided
+                sourceScore = 25;
+                auditLog.push({ type: 'negative', text: 'No source URL provided for verification.' });
             }
 
-            // Phase 3: Linguistic Neutrality (NLP)
-            let lingScore = 75; // Base neutral score
-            
-            lexicons.clickbait.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 20; });
-            lexicons.urgency.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 10; });
-            lexicons.subjective.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore -= 15; });
-            lexicons.objective.forEach(phrase => { if (lowerHead.includes(phrase)) lingScore += 10; });
+            // Phase 3: Linguistic NLP Matrices
+            let lingScore = 75; 
+            let foundClickbait = false, foundUrgency = false, foundSubj = false, foundObj = false;
+
+            lexicons.clickbait.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 20; foundClickbait = true; } });
+            lexicons.urgency.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 10; foundUrgency = true; } });
+            lexicons.subjective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 15; foundSubj = true; } });
+            lexicons.objective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore += 10; foundObj = true; } });
+
+            if (foundClickbait) auditLog.push({ type: 'negative', text: 'Detected manipulative or "clickbait" phrasing designed to farm engagement.' });
+            if (foundUrgency) auditLog.push({ type: 'warning', text: 'Detected artificial urgency or fear-mongering syntax.' });
+            if (foundSubj) auditLog.push({ type: 'warning', text: 'High volume of subjective or highly emotional adjectives detected.' });
+            if (foundObj) auditLog.push({ type: 'positive', text: 'Detected objective, data-driven, or formal reporting terminology.' });
 
             // Phase 4: Formatting Standards
-            let formScore = 90; // Assume good formatting initially
+            let formScore = 90; 
+            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) {
+                formScore -= 25;
+                auditLog.push({ type: 'negative', text: 'Unprofessional punctuation detected (excessive exclamation/question marks).' });
+            }
+            if (/\$[0-9]+/.test(headline) && lowerHead.includes("make")) {
+                formScore -= 30;
+                auditLog.push({ type: 'negative', text: 'Financial scam formatting pattern detected.' });
+            }
             
-            // Check for excessive punctuation screaming
-            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) formScore -= 25; 
-            if (/\$[0-9]+/.test(headline) && lowerHead.includes("make")) formScore -= 30; // "Make $1000" spam format
-            
-            // Check for ALL CAPS (more than 2 full uppercase words > 3 letters)
             let capsCount = headline.split(/\s+/).filter(w => w === w.toUpperCase() && w.replace(/[^A-Z]/g, '').length > 3).length;
-            if (capsCount > 1) formScore -= (capsCount * 12);
+            if (capsCount > 1) {
+                formScore -= (capsCount * 12);
+                auditLog.push({ type: 'negative', text: 'Excessive capitalization (shouting) detected.' });
+            }
 
-            // Bound scores between 5 and 98 to look realistic
+            // Calculate and Render
             sourceScore = Math.max(5, Math.min(98, sourceScore));
             lingScore = Math.max(5, Math.min(98, lingScore));
             formScore = Math.max(5, Math.min(98, formScore));
 
-            // Weight the final score
             let finalTrustScore = Math.round((sourceScore * 0.45) + (lingScore * 0.35) + (formScore * 0.20));
             
-            // Override verdict if satire is detected
             let customVerdict = null;
-            if (satiricalDomains.includes(domainData.hostname)) customVerdict = "Known Satire / Parody";
-            else if (urlShorteners.includes(domainData.hostname)) customVerdict = "Masked URL (High Risk)";
+            if (domainData.valid && satiricalDomains.includes(domainData.hostname)) customVerdict = "Known Satire / Parody";
+            else if (domainData.valid && urlShorteners.includes(domainData.hostname)) customVerdict = "Masked URL (High Risk)";
 
-            renderResults(finalTrustScore, sourceScore, lingScore, formScore, customVerdict);
+            renderResults(finalTrustScore, sourceScore, lingScore, formScore, customVerdict, auditLog);
         }
 
-        function renderResults(final, source, ling, form, customVerdict) {
+        function renderResults(final, source, ling, form, customVerdict, auditLog) {
             document.getElementById("loader").style.display = "none";
             document.getElementById("analyzeBtn").style.display = "block";
             document.getElementById("analyzeBtn").innerText = "Analyze New Data";
@@ -620,6 +656,30 @@
                 if (final >= 75) verdict.innerText = "Highly Credible";
                 else if (final >= 45) verdict.innerText = "Proceed with Caution";
                 else verdict.innerText = "Likely Fabricated / Clickbait";
+            }
+
+            // --- RENDER THE AUDIT LOG ---
+            const logBox = document.getElementById("reasoningLogBox");
+            const logList = document.getElementById("reasoningList");
+            logList.innerHTML = ""; // Clear old logs
+            
+            if (auditLog && auditLog.length > 0) {
+                logBox.style.display = "block";
+                auditLog.forEach(log => {
+                    let iconClass = "fa-circle-info neutral"; // default
+                    if (log.type === 'positive') iconClass = "fa-circle-check positive";
+                    if (log.type === 'negative') iconClass = "fa-circle-xmark negative";
+                    if (log.type === 'warning') iconClass = "fa-triangle-exclamation warning";
+
+                    logList.innerHTML += `
+                        <div class="log-item">
+                            <div class="log-icon ${log.type}"><i class="fa-solid ${iconClass}"></i></div>
+                            <div>${log.text}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                logBox.style.display = "none";
             }
         }
 
