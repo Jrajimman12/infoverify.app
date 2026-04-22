@@ -208,11 +208,19 @@
         .team-role { font-family: var(--font-code); color: var(--accent-primary); font-size: 13px; margin-bottom: 20px; letter-spacing: 0.5px; }
         .team-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
 
-        @media (max-width: 1000px) { .mega-guardian { display: none; } }
+        @media (max-width: 1000px) { .mega-guardian { display: none; } .hover-trigger { display: none; } }
         @media (max-width: 768px) { .nav-links { display: none; } .inline-team-details.active { max-height: 500px; } }
     </style>
 </head>
 <body>
+
+    <div class="hover-trigger trigger-left">
+        <img class="cool-img" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop" alt="Cool Hacker Code">
+    </div>
+
+    <div class="hover-trigger trigger-right">
+        <img class="cool-img" src="https://images.unsplash.com/photo-1618367588411-d9a90fefa881?q=80&w=600&auto=format&fit=crop" alt="Cyber Guy Setup">
+    </div>
 
     <nav>
         <a href="#home" class="logo"><div class="logo-icon"></div> InfoVerify</a>
@@ -633,7 +641,7 @@
             }
 
             // 3. Formatting
-            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) { 
+            if (/(!!+|\?\?+|\?!|!\?)/.test(headline)) { 
                 data.formScore -= 25; 
                 data.suggestions.push({ text: "Remove excessive exclamation or question marks.", pts: "+25", type: "warning" }); 
                 data.auditLog.push({ type: 'negative', text: 'Unprofessional punctuation detected.' });
