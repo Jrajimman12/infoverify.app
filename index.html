@@ -178,7 +178,7 @@
 
         /* --- FOOTER & TEAM CREDITS --- */
         footer { padding: 50px 20px; text-align: center; border-top: 1px solid var(--border-glass); background: rgba(0,0,0,0.6); position: relative; z-index: 20;}
-        .footer-credits { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .footer-credits { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; font-size: 13px; color: var(--text-muted); font-weight: 500; position: relative; z-index: 30;}
         
         .credit-badge { 
             background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); 
@@ -200,27 +200,73 @@
         .credit-badge:hover span, .credit-badge.active-badge span { color: #fff; }
         .credit-badge:hover i, .credit-badge.active-badge i { transform: rotate(15deg) scale(1.2); }
 
-        .inline-team-details { max-height: 0; overflow: hidden; opacity: 0; width: 100%; max-width: 700px; margin: 0 auto; transition: max-height 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease, margin 0.4s ease; }
-        .inline-team-details.active { max-height: 400px; opacity: 1; margin-top: 40px; }
-        .team-detail-card { background: var(--bg-surface); border: 1px solid var(--accent-primary); border-radius: 24px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 30px rgba(67, 97, 238, 0.05); position: relative; }
+        /* --- ENHANCED 3D INLINE TEAM DETAILS --- */
+        .inline-team-details { 
+            max-height: 0; 
+            overflow: hidden; 
+            opacity: 0; 
+            width: 100%; 
+            max-width: 700px; 
+            margin: 0 auto; 
+            perspective: 1200px; /* 3D Perspective added */
+            transition: max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, margin 0.6s ease; 
+        }
+        .inline-team-details.active { 
+            max-height: 500px; 
+            opacity: 1; 
+            margin-top: 40px; 
+        }
+        
+        .team-detail-card { 
+            background: var(--bg-surface); 
+            border: 1px solid rgba(67, 97, 238, 0.3); 
+            border-radius: 24px; 
+            padding: 40px; 
+            text-align: center; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 0 30px rgba(67, 97, 238, 0.05); 
+            position: relative; 
+            
+            /* The 3D Fold Animation */
+            transform-origin: top center;
+            transform: rotateX(-45deg) translateY(-30px);
+            opacity: 0;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease, border-color 0.4s;
+        }
+        
+        .inline-team-details.active .team-detail-card {
+            transform: rotateX(0) translateY(0);
+            opacity: 1;
+            border-color: var(--accent-primary);
+        }
+
+        /* Staggered Children Reveal */
+        .team-detail-card > * {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .inline-team-details.active .team-detail-card .team-avatar { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+        .inline-team-details.active .team-detail-card .team-name   { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+        .inline-team-details.active .team-detail-card .team-role   { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+        .inline-team-details.active .team-detail-card .team-desc   { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+
+        /* Smooth Fade Swap for clicking between badges */
+        .team-detail-card.switching > * {
+            opacity: 0 !important;
+            transform: translateY(-10px) !important;
+            transition: all 0.3s ease !important;
+        }
+
         .team-avatar { width: 70px; height: 70px; margin: 0 auto 15px auto; border-radius: 18px; background: linear-gradient(135deg, rgba(67, 97, 238, 0.2), rgba(139, 92, 246, 0.2)); border: 1px solid var(--accent-primary); color: var(--accent-primary); display: flex; justify-content: center; align-items: center; font-size: 28px; box-shadow: 0 0 15px var(--accent-glow); }
         .team-name { font-size: 24px; font-weight: 800; margin-bottom: 5px; color: #fff; }
         .team-role { font-family: var(--font-code); color: var(--accent-primary); font-size: 13px; margin-bottom: 20px; letter-spacing: 0.5px; }
         .team-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
 
-        @media (max-width: 1000px) { .mega-guardian { display: none; } .hover-trigger { display: none; } }
+        @media (max-width: 1000px) { .mega-guardian { display: none; } }
         @media (max-width: 768px) { .nav-links { display: none; } .inline-team-details.active { max-height: 500px; } }
     </style>
 </head>
 <body>
-
-    <div class="hover-trigger trigger-left">
-        <img class="cool-img" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop" alt="Cool Hacker Code">
-    </div>
-
-    <div class="hover-trigger trigger-right">
-        <img class="cool-img" src="https://images.unsplash.com/photo-1618367588411-d9a90fefa881?q=80&w=600&auto=format&fit=crop" alt="Cyber Guy Setup">
-    </div>
 
     <nav>
         <a href="#home" class="logo"><div class="logo-icon"></div> InfoVerify</a>
@@ -249,7 +295,7 @@
 
                 <div class="input-group">
                     <label>Article Source (URL)</label>
-                    <input type="text" id="sourceInput" placeholder="e.g., bbc.com or suspicious-news.net">
+                    <input type="text" id="sourceInput" placeholder="e.g., drmgrdu.ac.in or suspicious-news.net">
                 </div>
                 <div class="input-group">
                     <label>Headline / Claim</label>
@@ -404,25 +450,58 @@
     </footer>
 
     <script>
-        // --- INLINE TEAM MODAL LOGIC ---
+        // --- ENHANCED INLINE TEAM MODAL LOGIC ---
         const teamData = {
             johnson: { name: "Johnson", role: "Lead Systems Engineer", icon: "fa-server", desc: "Architected the core NLP engine and algorithmic hashing functions." },
             abdur: { name: "Abdur Rahman", role: "Full-Stack Developer", icon: "fa-terminal", desc: "Bridged the gap between the complex mathematical algorithms and the interactive UI." },
             jebaraj: { name: "Jebaraj Immanuel", role: "UX/UI Designer", icon: "fa-pen-nib", desc: "Designed the enterprise-grade Glassmorphism interface." }
         };
+        
         let activeMember = null;
+        let isSwitching = false; // Prevents animation glitches if clicked too fast
+
         function toggleTeamDetails(member) {
+            if (isSwitching) return; 
+
             const container = document.getElementById('inlineTeamDetails');
+            const card = document.querySelector('.team-detail-card');
+            
             document.querySelectorAll('.credit-badge').forEach(b => b.classList.remove('active-badge'));
-            if (activeMember === member) { container.classList.remove('active'); activeMember = null; return; }
+            
+            if (activeMember === member) { 
+                container.classList.remove('active'); 
+                activeMember = null; 
+                return; 
+            }
+
             const data = teamData[member];
+            document.getElementById(`badge-${member}`).classList.add('active-badge');
+            
+            if (container.classList.contains('active')) {
+                // The card is already open. Do a smooth fade swap!
+                isSwitching = true;
+                card.classList.add('switching');
+                
+                setTimeout(() => {
+                    updateCardUI(data);
+                    card.classList.remove('switching');
+                    isSwitching = false;
+                }, 300); // Wait for the fade out to finish before swapping text
+                
+            } else {
+                // The card is closed. Do the full 3D unfold!
+                updateCardUI(data);
+                container.classList.add('active');
+                setTimeout(() => { container.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
+            }
+            activeMember = member;
+        }
+
+        function updateCardUI(data) {
             document.getElementById('teamAvatarIcon').className = `fa-solid ${data.icon}`;
             document.getElementById('teamName').innerText = data.name;
             document.getElementById('teamRole').innerText = `< ${data.role} />`;
             document.getElementById('teamDesc').innerText = data.desc;
-            document.getElementById(`badge-${member}`).classList.add('active-badge');
-            container.classList.add('active'); activeMember = member;
-            setTimeout(() => { container.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 150);
         }
 
         // --- WATCHER TOY LOGIC ---
@@ -640,7 +719,7 @@
                 data.auditLog.push({ type: 'warning', text: `Low linguistic complexity detected (Avg ${avgWordLength.toFixed(1)} chars/word). Typical of tabloid phrasing.` });
             }
 
-            // 3. Formatting
+            // 3. Formatting (PUNCTUATION BUG FIXED HERE)
             if (/(!!+|\?\?+|\?!|!\?)/.test(headline)) { 
                 data.formScore -= 25; 
                 data.suggestions.push({ text: "Remove excessive exclamation or question marks.", pts: "+25", type: "warning" }); 
