@@ -40,55 +40,17 @@
             display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        /* --- THE EDGE HOVER IMAGES --- */
-        .hover-trigger {
-            position: fixed;
-            top: 0;
-            width: 120px; /* Invisible hit area width */
-            height: 100vh;
-            z-index: 1000;
+        /* --- SCREEN EDGE EASTER EGGS --- */
+        .hacker-zone {
+            position: fixed; top: 0; width: 10%; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease;
+            color: var(--danger); font-size: 60px; text-shadow: 0 0 20px rgba(239, 35, 60, 0.6);
+            pointer-events: none;
         }
-        
-        .trigger-left { left: 0; }
-        .trigger-right { right: 0; }
-
-        .cool-img {
-            position: absolute;
-            top: 50%;
-            width: 300px;
-            height: 450px;
-            object-fit: cover;
-            border-radius: 16px;
-            opacity: 0;
-            pointer-events: none; /* Keeps the mouse hovering on the trigger div */
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(67, 97, 238, 0.3);
-            filter: brightness(0.6) contrast(1.2) grayscale(30%);
-            border: 1px solid var(--border-glass);
-        }
-
-        .trigger-left .cool-img { 
-            left: 30px; 
-            transform: translateY(-50%) translateX(-40px) scale(0.9) rotate(-2deg); 
-        }
-        
-        .trigger-right .cool-img { 
-            right: 30px; 
-            transform: translateY(-50%) translateX(40px) scale(0.9) rotate(2deg); 
-        }
-
-        /* The Reveal Animation */
-        .trigger-left:hover .cool-img {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0) scale(1) rotate(0deg);
-            filter: brightness(0.9) contrast(1.1) grayscale(0%);
-        }
-        
-        .trigger-right:hover .cool-img {
-            opacity: 1;
-            transform: translateY(-50%) translateX(0) scale(1) rotate(0deg);
-            filter: brightness(0.9) contrast(1.1) grayscale(0%);
-        }
+        .hacker-zone.left { left: 0; transform: translateX(-20px); }
+        .hacker-zone.right { right: 0; transform: translateX(20px); }
+        body:hover .hacker-zone.left:hover, body:hover .hacker-zone.right:hover { opacity: 0.15; transform: translateX(0); }
 
         /* --- NAVIGATION --- */
         nav {
@@ -246,19 +208,11 @@
         .team-role { font-family: var(--font-code); color: var(--accent-primary); font-size: 13px; margin-bottom: 20px; letter-spacing: 0.5px; }
         .team-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
 
-        @media (max-width: 1000px) { .mega-guardian { display: none; } .hover-trigger { display: none; } }
+        @media (max-width: 1000px) { .mega-guardian { display: none; } }
         @media (max-width: 768px) { .nav-links { display: none; } .inline-team-details.active { max-height: 500px; } }
     </style>
 </head>
 <body>
-
-    <div class="hover-trigger trigger-left">
-        <img class="cool-img" src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop" alt="Cool Hacker Code">
-    </div>
-
-    <div class="hover-trigger trigger-right">
-        <img class="cool-img" src="https://images.unsplash.com/photo-1618367588411-d9a90fefa881?q=80&w=600&auto=format&fit=crop" alt="Cyber Guy Setup">
-    </div>
 
     <nav>
         <a href="#home" class="logo"><div class="logo-icon"></div> InfoVerify</a>
@@ -441,7 +395,322 @@
         </div>
     </footer>
 
-    <script src="nlp-engine.js"></script>
+    <script src="keywords.js"></script>
 
+    <script>
+        // --- INLINE TEAM MODAL LOGIC (Hidden for brevity, identical to previous) ---
+        const teamData = {
+            johnson: { name: "Johnson", role: "Lead Systems Engineer", icon: "fa-server", desc: "Architected the core NLP engine and algorithmic hashing functions." },
+            abdur: { name: "Abdur Rahman", role: "Full-Stack Developer", icon: "fa-terminal", desc: "Bridged the gap between the complex mathematical algorithms and the interactive UI." },
+            jebaraj: { name: "Jebaraj Immanuel", role: "UX/UI Designer", icon: "fa-pen-nib", desc: "Designed the enterprise-grade Glassmorphism interface." }
+        };
+        let activeMember = null;
+        function toggleTeamDetails(member) {
+            const container = document.getElementById('inlineTeamDetails');
+            document.querySelectorAll('.credit-badge').forEach(b => b.classList.remove('active-badge'));
+            if (activeMember === member) { container.classList.remove('active'); activeMember = null; return; }
+            const data = teamData[member];
+            document.getElementById('teamAvatarIcon').className = `fa-solid ${data.icon}`;
+            document.getElementById('teamName').innerText = data.name;
+            document.getElementById('teamRole').innerText = `< ${data.role} />`;
+            document.getElementById('teamDesc').innerText = data.desc;
+            document.getElementById(`badge-${member}`).classList.add('active-badge');
+            container.classList.add('active'); activeMember = member;
+            setTimeout(() => { container.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 150);
+        }
+
+        // --- WATCHER TOY LOGIC ---
+        document.addEventListener('mousemove', (e) => {
+            const pupils = document.querySelectorAll('.watcher-pupil');
+            const head = document.getElementById('watcherHead');
+            pupils.forEach(pupil => {
+                const rect = pupil.parentElement.getBoundingClientRect();
+                const x = rect.left + (rect.width / 2), y = rect.top + (rect.height / 2);
+                const distanceX = Math.max(-6, Math.min(6, (e.clientX - x) / 20)), distanceY = Math.max(-6, Math.min(6, (e.clientY - y) / 20));
+                pupil.style.transform = `translate(calc(-50% + ${distanceX}px), calc(-50% + ${distanceY}px))`;
+            });
+            if(head) {
+                const hRect = head.getBoundingClientRect();
+                const hX = hRect.left + (hRect.width / 2), hY = hRect.top + (hRect.height / 2);
+                const rotateY = Math.max(-20, Math.min(20, (e.clientX - hX) / 30)), rotateX = Math.max(-15, Math.min(15, -(e.clientY - hY) / 30));
+                head.style.transform = `perspective(500px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+            }
+        });
+
+        // --- CORE ALGORITHM DATA ---
+        const tldWeights = { '.gov': 35, '.edu': 30, '.ac.in': 30, '.in': 30, '.org': 10, '.int': 20, '.com': 0, '.net': 0, '.co.uk': 5, '.xyz': 0, '.co': -10, '.info': -15, '.biz': -20, '.top': -35, '.click': -40 };
+        const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int'];
+        const satiricalDomains = ['theonion.com', 'babylonbee.com', 'clickhole.com'];
+        const urlShorteners = ['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd'];
+        
+        // NOTE: The 'lexicons' variable has been moved to keywords.js!
+
+        function extractDomainData(urlInput) {
+            let cleanedUrl = urlInput.trim().toLowerCase();
+            if (!cleanedUrl.startsWith('http')) cleanedUrl = 'http://' + cleanedUrl;
+            try {
+                const urlObj = new URL(cleanedUrl);
+                const hostname = urlObj.hostname.replace('www.', '');
+                const tldMatch = hostname.match(/\.[a-z]+(\.[a-z]+)?$/);
+                return { hostname, tld: tldMatch ? tldMatch[0] : '', valid: true };
+            } catch (e) { return { hostname: urlInput, tld: '', valid: false }; }
+        }
+
+        // --- MODE SWITCHING & LIVE LISTENERS ---
+        let currentMode = 'reader'; // 'reader' or 'publisher'
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnReaderMode').classList.toggle('active', mode === 'reader');
+            document.getElementById('btnPublisherMode').classList.toggle('active', mode === 'publisher');
+            
+            if (mode === 'publisher') {
+                document.getElementById('analyzeBtn').style.display = 'none';
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('liveCoachPanel').style.display = 'block';
+                runLiveOptimization(); // Trigger immediately on switch
+            } else {
+                document.getElementById('analyzeBtn').style.display = 'block';
+                document.getElementById('liveCoachPanel').style.display = 'none';
+            }
+        }
+
+        // Attach Live Listeners for Publisher Mode
+        document.getElementById('headlineInput').addEventListener('input', runLiveOptimization);
+        document.getElementById('sourceInput').addEventListener('input', runLiveOptimization);
+        
+        // Enter Key for Reader Mode
+        document.getElementById('headlineInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey && currentMode === 'reader') {
+                e.preventDefault(); startAnalysis();
+            }
+        });
+
+        // --- PUBLISHER COACH: LIVE OPTIMIZATION ENGINE ---
+        function runLiveOptimization() {
+            if (currentMode !== 'publisher') return;
+            
+            const headline = document.getElementById("headlineInput").value.trim();
+            const sourceUrl = document.getElementById("sourceInput").value.trim();
+            const lowerHead = headline.toLowerCase();
+            const words = lowerHead.split(/\s+/).filter(w => w.length > 0);
+            
+            const scoreElement = document.getElementById("liveScoreNumber");
+            const suggestionsBox = document.getElementById("coachSuggestionsBox");
+            suggestionsBox.innerHTML = ""; // Clear old suggestions
+            
+            // If empty, reset
+            if (words.length === 0 && !sourceUrl) {
+                scoreElement.innerText = "0%";
+                scoreElement.style.color = "var(--text-muted)";
+                suggestionsBox.innerHTML = `<div class="coach-suggestion"><i class="fa-solid fa-pen"></i> Type a headline or paste a link to begin live optimization.</div>`;
+                return;
+            }
+
+            let sourceScore = 50, lingScore = 75, formScore = 90;
+            let suggestions = [];
+
+            // Phase 1: Gibberish
+            if (words.length > 0 && words.length < 4) {
+                suggestions.push({ text: "Write a complete headline (at least 4 words) to establish structural integrity.", pts: "Critical", type: "warning" });
+            }
+
+            // Phase 2: Source Verification
+            if (sourceUrl) {
+                const domainData = extractDomainData(sourceUrl);
+                if (domainData.valid && tldWeights[domainData.tld] !== undefined) {
+                    let weight = tldWeights[domainData.tld];
+                    sourceScore += weight;
+                    if (weight < 0) suggestions.push({ text: `Low-tier TLD detected (${domainData.tld}). Upgrade to a .com, .edu, or .in.`, pts: `+${Math.abs(weight)}`, type: "warning" });
+                }
+                if (domainData.valid && urlShorteners.includes(domainData.hostname)) {
+                    sourceScore = 20;
+                    suggestions.push({ text: "URL shortener detected. Use the direct link to establish transparency.", pts: "+30", type: "warning" });
+                }
+            } else {
+                suggestions.push({ text: "Provide a verified source URL to boost your domain credibility.", pts: "+45", type: "warning" });
+                sourceScore = 25;
+            }
+
+            // Phase 3: Linguistic NLP (Reads from keywords.js)
+            let clickbaitFound = false, objFound = false;
+            lexicons.clickbait.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 20; clickbaitFound = true; suggestions.push({ text: `Remove manipulative phrase "${phrase}".`, pts: "+20", type: "warning" }); } });
+            lexicons.urgency.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 10; suggestions.push({ text: `Remove artificial urgency ("${phrase}").`, pts: "+10", type: "warning" }); } });
+            lexicons.subjective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 15; suggestions.push({ text: `Replace emotional adjective "${phrase}" with neutral terminology.`, pts: "+15", type: "warning" }); } });
+            lexicons.objective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore += 10; objFound = true; } });
+
+            if (!objFound && words.length > 4) {
+                suggestions.push({ text: "Add objective markers (e.g., 'Reports state', 'Data shows') to increase journalism score.", pts: "+10", type: "warning" });
+            } else if (objFound) {
+                suggestions.push({ text: "Objective journalistic phrasing detected! Good job.", pts: "Secured", type: "good" });
+            }
+
+            // Phase 4: Formatting
+            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) { formScore -= 25; suggestions.push({ text: "Remove excessive exclamation or question marks.", pts: "+25", type: "warning" }); }
+            let capsCount = headline.split(/\s+/).filter(w => w === w.toUpperCase() && w.replace(/[^A-Z]/g, '').length > 3).length;
+            if (capsCount > 1) { formScore -= (capsCount * 12); suggestions.push({ text: "Avoid shouting. Convert ALL CAPS words to standard case.", pts: `+${capsCount * 12}`, type: "warning" }); }
+
+            // Math
+            sourceScore = Math.max(5, Math.min(98, sourceScore));
+            lingScore = Math.max(5, Math.min(98, lingScore));
+            formScore = Math.max(5, Math.min(98, formScore));
+            let finalTrustScore = Math.round((sourceScore * 0.45) + (lingScore * 0.35) + (formScore * 0.20));
+
+            // Render Coach UI
+            scoreElement.innerText = finalTrustScore + "%";
+            scoreElement.style.color = getColor(finalTrustScore);
+
+            if (suggestions.length === 0) {
+                suggestionsBox.innerHTML = `<div class="coach-suggestion good"><i class="fa-solid fa-check-double"></i> <span>Headline is highly optimized for algorithmic reach!</span> <span class="coach-points">Max</span></div>`;
+            } else {
+                suggestions.forEach(sug => {
+                    let icon = sug.type === 'good' ? 'fa-check' : 'fa-wrench';
+                    suggestionsBox.innerHTML += `
+                        <div class="coach-suggestion ${sug.type}">
+                            <div><i class="fa-solid ${icon}" style="margin-right: 8px;"></i> ${sug.text}</div>
+                            <span class="coach-points">${sug.pts}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        // --- READER MODE LOGIC (Original Scanner) ---
+        function startAnalysis() {
+            if (currentMode !== 'reader') return;
+            const headline = document.getElementById("headlineInput").value.trim();
+            const source = document.getElementById("sourceInput").value.trim();
+            if (!headline) { alert("Please enter a headline to analyze."); return; }
+
+            document.getElementById("analyzeBtn").style.display = "none";
+            document.getElementById("results").style.display = "none";
+            document.getElementById("reasoningList").style.display = "none";
+            document.getElementById("reasoningHeader").classList.remove("open");
+            document.getElementById("loader").style.display = "block";
+            
+            let loadSteps = ["Extracting URL Topology...", "Parsing TLD Weights...", "Running NLP Matrices...", "Finalizing Verdict..."];
+            let step = 0;
+            let interval = setInterval(() => { if(step < loadSteps.length) { document.getElementById("loadingText").innerText = loadSteps[step]; step++; } }, 400);
+
+            setTimeout(() => { clearInterval(interval); processAlgorithmReader(headline, source); }, 1800);
+        }
+
+        function processAlgorithmReader(headline, sourceUrl) {
+            // (This logic mirrors the Live Coach, but outputs to the Audit Trail instead of Live Suggestions)
+            const lowerHead = headline.toLowerCase();
+            const words = lowerHead.split(/\s+/).filter(w => w.length > 0);
+            let auditLog = []; 
+            
+            if (words.length < 3 || lowerHead.length < 12) {
+                auditLog.push({ type: 'negative', text: 'Input flagged as insufficient data or gibberish.' });
+                renderResultsReader(0, 10, 0, 0, "Insufficient Data", auditLog);
+                return;
+            }
+
+            let sourceScore = 50; 
+            const domainData = extractDomainData(sourceUrl);
+            if (domainData.valid) {
+                if (tldWeights[domainData.tld] !== undefined) {
+                    sourceScore += tldWeights[domainData.tld];
+                    if (tldWeights[domainData.tld] > 0) auditLog.push({ type: 'positive', text: `Domain TLD (${domainData.tld}) recognized as structurally authoritative.` });
+                    else if (tldWeights[domainData.tld] < 0) auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with low-quality or spam networks.` });
+                    else auditLog.push({ type: 'neutral', text: `Domain TLD (${domainData.tld}) is recognized as a standard neutral domain.` });
+                }
+                if (trustedDomains.includes(domainData.hostname)) { sourceScore = 95; auditLog.push({ type: 'positive', text: 'Source verified against the Global Trusted Ledger.' }); } 
+                else if (satiricalDomains.includes(domainData.hostname)) { sourceScore = 15; auditLog.push({ type: 'neutral', text: 'Source identified as a known Satire/Parody network.' }); } 
+                else if (urlShorteners.includes(domainData.hostname)) { sourceScore = 20; auditLog.push({ type: 'negative', text: 'URL shortener detected. True destination is masked.' }); } 
+                else if (tldWeights[domainData.tld] === undefined) { auditLog.push({ type: 'neutral', text: 'Source domain is unverified in the global ledger. Neutral score applied.' }); }
+            } else if (!sourceUrl) { sourceScore = 25; auditLog.push({ type: 'negative', text: 'No source URL provided for verification.' }); }
+
+            let lingScore = 75; 
+            let foundClickbait = false, foundUrgency = false, foundSubj = false, foundObj = false;
+            
+            // Reads from keywords.js
+            lexicons.clickbait.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 20; foundClickbait = true; } });
+            lexicons.urgency.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 10; foundUrgency = true; } });
+            lexicons.subjective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore -= 15; foundSubj = true; } });
+            lexicons.objective.forEach(phrase => { if (lowerHead.includes(phrase)) { lingScore += 10; foundObj = true; } });
+
+            if (foundClickbait) auditLog.push({ type: 'negative', text: 'Detected manipulative or "clickbait" phrasing designed to farm engagement.' });
+            if (foundUrgency) auditLog.push({ type: 'warning', text: 'Detected artificial urgency or fear-mongering syntax.' });
+            if (foundSubj) auditLog.push({ type: 'warning', text: 'High volume of subjective or highly emotional adjectives detected.' });
+            if (foundObj) auditLog.push({ type: 'positive', text: 'Detected objective, data-driven, or formal reporting terminology.' });
+
+            let formScore = 90; 
+            if (/(!!+|\?\?+|\?!|\!?)/.test(headline)) { formScore -= 25; auditLog.push({ type: 'negative', text: 'Unprofessional punctuation detected (excessive exclamation/question marks).' }); }
+            let capsCount = headline.split(/\s+/).filter(w => w === w.toUpperCase() && w.replace(/[^A-Z]/g, '').length > 3).length;
+            if (capsCount > 1) { formScore -= (capsCount * 12); auditLog.push({ type: 'negative', text: 'Excessive capitalization (shouting) detected.' }); }
+
+            sourceScore = Math.max(5, Math.min(98, sourceScore)); lingScore = Math.max(5, Math.min(98, lingScore)); formScore = Math.max(5, Math.min(98, formScore));
+            let finalTrustScore = Math.round((sourceScore * 0.45) + (lingScore * 0.35) + (formScore * 0.20));
+            
+            let customVerdict = null;
+            if (domainData.valid && satiricalDomains.includes(domainData.hostname)) customVerdict = "Known Satire / Parody";
+            else if (domainData.valid && urlShorteners.includes(domainData.hostname)) customVerdict = "Masked URL (High Risk)";
+
+            renderResultsReader(finalTrustScore, sourceScore, lingScore, formScore, customVerdict, auditLog);
+        }
+
+        function renderResultsReader(final, source, ling, form, customVerdict, auditLog) {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("analyzeBtn").style.display = "block";
+            document.getElementById("analyzeBtn").innerText = "Analyze New Data";
+            
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.style.display = "block";
+            
+            animateBar("sourceBar", source, getColor(source)); document.getElementById("sourceScoreTxt").innerText = source + "/100";
+            animateBar("lingBar", ling, getColor(ling)); document.getElementById("lingScoreTxt").innerText = ling + "/100";
+            animateBar("formBar", form, getColor(form)); document.getElementById("formScoreTxt").innerText = form + "/100";
+
+            const card = document.getElementById("finalScoreCard"), verdict = document.getElementById("verdictText");
+            document.getElementById("scoreNumber").innerText = final + "% Trust";
+
+            let bgColor = getColor(final);
+            card.style.backgroundColor = `rgba(${hexToRgb(bgColor)}, 0.15)`; card.style.color = bgColor; card.style.borderColor = `rgba(${hexToRgb(bgColor)}, 0.4)`;
+
+            if (customVerdict) { verdict.innerText = customVerdict; } 
+            else {
+                if (final >= 75) verdict.innerText = "Highly Credible";
+                else if (final >= 45) verdict.innerText = "Proceed with Caution";
+                else verdict.innerText = "Likely Fabricated / Clickbait";
+            }
+
+            const logList = document.getElementById("reasoningList"); logList.innerHTML = ""; 
+            if (auditLog && auditLog.length > 0) {
+                document.getElementById("reasoningLogBox").style.display = "block";
+                auditLog.forEach(log => {
+                    let iconClass = "fa-circle-info neutral"; 
+                    if (log.type === 'positive') iconClass = "fa-circle-check positive";
+                    if (log.type === 'negative') iconClass = "fa-circle-xmark negative";
+                    if (log.type === 'warning') iconClass = "fa-triangle-exclamation warning";
+                    logList.innerHTML += `<div class="log-item"><div class="log-icon ${log.type}"><i class="fa-solid ${iconClass}"></i></div><div>${log.text}</div></div>`;
+                });
+            } else { document.getElementById("reasoningLogBox").style.display = "none"; }
+        }
+
+        function toggleAuditLog() {
+            const list = document.getElementById("reasoningList"), header = document.getElementById("reasoningHeader");
+            if (list.style.display === "none" || list.style.display === "") { list.style.display = "block"; header.classList.add("open"); } 
+            else { list.style.display = "none"; header.classList.remove("open"); }
+        }
+
+        function animateBar(id, value, color) {
+            const bar = document.getElementById(id);
+            bar.style.width = "0%"; bar.style.backgroundColor = color; bar.style.boxShadow = `0 0 10px ${color}`;
+            setTimeout(() => { bar.style.width = value + "%"; }, 50);
+        }
+
+        function getColor(score) {
+            if (score >= 75) return "#06d6a0"; 
+            if (score >= 45) return "#f77f00"; 
+            return "#ef233c"; 
+        }
+
+        function hexToRgb(hex) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+        }
+    </script>
 </body>
 </html>
