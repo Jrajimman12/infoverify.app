@@ -1,0 +1,6 @@
+const lexicons = {
+    clickbait: ["you won't believe", "shocking", "this one trick", "what happens next", "mind-blowing", "secret", "they don't want you to know"],
+    urgency: ["act now", "hurry", "limited time", "before it's deleted", "warning", "urgent", "breaking", "alert"],
+    subjective: ["terrible", "outrageous", "disgusting", "best", "worst", "absolute", "destroys", "slams", "humiliates", "owned"],
+    objective: ["reports", "stated", "officials", "according to", "announced", "data shows", "investigation", "published", "researchers"]
+};
