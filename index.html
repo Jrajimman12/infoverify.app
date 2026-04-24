@@ -281,7 +281,7 @@
         .team-role { font-family: var(--font-code); color: var(--accent-primary); font-size: 13px; margin-bottom: 20px; letter-spacing: 0.5px; }
         .team-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
 
-        /* VERSION INDICATOR */
+        /* --- CHANGELOG DROPDOWN --- */
         .version-indicator {
             margin-top: 35px;
             font-family: var(--font-code);
@@ -293,16 +293,53 @@
             padding: 8px 16px;
             border-radius: 100px;
             border: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.4s var(--ease-spring);
+            user-select: none;
+            position: relative;
+            z-index: 50;
+        }
+        .version-indicator:hover {
+            background: rgba(67, 97, 238, 0.1);
+            border-color: rgba(67, 97, 238, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.15);
         }
         .version-indicator .version-highlight {
             color: var(--accent-primary);
             font-weight: 600;
             text-shadow: 0 0 10px rgba(67, 97, 238, 0.4);
         }
-        .version-indicator i {
-            color: var(--safe);
-            margin-left: 5px;
+        .version-indicator i.check-icon { color: var(--safe); margin-left: 5px; }
+        .version-indicator i.toggle-icon { transition: transform 0.5s var(--ease-spring); margin-left: 6px; font-size: 11px;}
+        .version-indicator.open i.toggle-icon { transform: rotate(180deg); color: var(--accent-primary); }
+        
+        .changelog-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.6s var(--ease-expo);
+            max-width: 450px;
+            margin: 0 auto;
         }
+        .changelog-wrapper.open { grid-template-rows: 1fr; margin-top: 15px; }
+        
+        .changelog-inner {
+            overflow: hidden;
+            opacity: 0;
+            padding: 0 20px;
+            background: rgba(20, 20, 25, 0.9);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            text-align: left;
+            transition: opacity 0.6s var(--ease-expo), padding 0.6s var(--ease-expo), border-color 0.4s ease;
+        }
+        .changelog-wrapper.open .changelog-inner { padding: 20px; opacity: 1; border-color: rgba(67, 97, 238, 0.3); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        
+        .changelog-inner h4 { color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;}
+        .changelog-list { list-style: none; padding: 0; margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+        .changelog-list li { margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; }
+        .changelog-list li:last-child { margin-bottom: 0; }
+        .changelog-list li i { margin-top: 3px; }
 
         @media (max-width: 1000px) { .mega-guardian { display: none; } }
         @media (max-width: 768px) { .nav-links { display: none; } }
@@ -320,7 +357,7 @@
 
     <section id="home">
         <div class="hero-section">
-            <div class="tagline">NLP-Powered Engine v6.0.0</div>
+            <div class="tagline">NLP-Powered Engine v7.0.1</div>
             <h1>Verify the Truth in Milliseconds.</h1>
             <p>Analyze linguistic topologies, verify source reputations, and detect clickbait manipulation before you share.</p>
         </div>
@@ -337,7 +374,7 @@
 
                 <div class="input-group">
                     <label>Article Source (URL)</label>
-                    <input type="text" id="sourceInput" placeholder="e.g., drmgrdu.ac.in or suspicious-news.net">
+                    <input type="text" id="sourceInput" placeholder="e.g., https://drmgrdu.ac.in or http://suspicious-news.net">
                 </div>
                 <div class="input-group">
                     <label>Headline / Claim</label>
@@ -420,14 +457,13 @@
         <div class="ledger-title">Live Threat Interception Feed</div>
         <div class="marquee-container">
             <div class="marquee-track">
-                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: secure-login-update-now.net</div>
+                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: http://secure-login-update-now.net</div>
                 <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: viral-shocking-news-daily.com</div>
                 <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: account-verify-auth.co</div>
                 <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: the-real-truth-exposed.org</div>
                 <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: banking-alert-action-req.info</div>
-                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: secure-login-update-now.net</div>
-                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: viral-shocking-news-daily.com</div>
-                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: account-verify-auth.co</div>
+                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: g00gle-secure.xyz</div>
+                <div class="threat-item"><i class="fa-solid fa-ban"></i> BLOCKED: news12345.biz</div>
             </div>
         </div>
     </div>
@@ -472,7 +508,7 @@
                 <i class="fa-solid fa-server"></i> Engineered by <span>Johnson</span>
             </div>
             <div class="credit-badge" id="badge-abdur" onclick="toggleTeamDetails('abdur')">
-                <i class="fa-solid fa-terminal"></i> Developed by <span>Abdur rahman</span>
+                <i class="fa-solid fa-terminal"></i> Developed by <span>Abdur Rahman</span>
             </div>
             <div class="credit-badge" id="badge-jebaraj" onclick="toggleTeamDetails('jebaraj')">
                 <i class="fa-solid fa-pen-nib"></i> Designed by <span>Jebaraj</span>
@@ -496,8 +532,23 @@
             &copy; 2026 InfoVerify Systems. All rights reserved.
         </div>
         
-        <div class="version-indicator">
-            Engine Version: <span class="version-highlight">v6.0.0_STABLE</span> (Up to date) <i class="fa-solid fa-circle-check"></i>
+        <div style="text-align: center; position: relative; margin-top: 35px;">
+            <div class="version-indicator" id="versionBtn" onclick="toggleChangelog()">
+                Engine Version: <span class="version-highlight">v7.0.1_ENTERPRISE</span> (Up to date) <i class="fa-solid fa-circle-check check-icon"></i>
+                <i class="fa-solid fa-chevron-down toggle-icon"></i>
+            </div>
+            
+            <div class="changelog-wrapper" id="changelogBox">
+                <div class="changelog-inner">
+                    <h4><i class="fa-solid fa-rocket" style="color: var(--accent-primary);"></i> What's New in v7.0.0</h4>
+                    <ul class="changelog-list">
+                        <li><i class="fa-solid fa-shield-virus" style="color: var(--safe);"></i> <strong>Global Ledger Expand:</strong> Added .mil, .gov, .bank and 20+ new domain algorithms.</li>
+                        <li><i class="fa-solid fa-users-slash" style="color: var(--warning);"></i> <strong>UGC Sandbox:</strong> Intercepts social media (X, Reddit) at a strict 45% caution rating.</li>
+                        <li><i class="fa-solid fa-code-compare" style="color: var(--safe);"></i> <strong>Regex Heuristics:</strong> Now actively catches typosquatting (e.g., g00gle) and number farming.</li>
+                        <li><i class="fa-solid fa-lock" style="color: var(--danger);"></i> <strong>HTTP Filter:</strong> Auto-penalizes unencrypted traffic by -40 points.</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -577,10 +628,14 @@
             }
         });
 
-        // --- CORE ALGORITHM DATA (MASSIVELY UPGRADED) ---
-        const tldWeights = { '.gov': 45, '.edu': 40, '.ac.in': 45, '.in': 30, '.org': 15, '.int': 20, '.com': 0, '.net': 0, '.co.uk': 5, '.xyz': -20, '.co': -10, '.info': -15, '.biz': -20, '.top': -35, '.click': -40 };
+        // --- CORE ALGORITHM DATA (v7.0.0 MASSIVE INJECTION) ---
+        const tldWeights = { 
+            '.gov': 50, '.mil': 50, '.edu': 45, '.bank': 45, '.ac.in': 45, 
+            '.in': 20, '.uk': 20, '.us': 20, '.ca': 20, '.au': 20, '.de': 20, '.fr': 20, '.cn': 10, '.ru': 5,
+            '.com': 0, '.org': 10, '.net': 0, '.co': 0, '.io': 5, '.tv': 0, '.me': 0, '.health': 0, '.science': 0,
+            '.xyz': -20, '.info': -15, '.biz': -20, '.news': -10, '.shop': -15, '.top': -35, '.click': -40 
+        };
         
-        // Vastly expanded trusted domains list
         const trustedDomains = [
             'bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int', 'drmgrdu.ac.in',
             'nytimes.com', 'washingtonpost.com', 'theguardian.com', 'cnn.com', 'foxnews.com', 'nbcnews.com', 'cbsnews.com', 
@@ -588,19 +643,23 @@
             'harvard.edu', 'mit.edu', 'stanford.edu', 'ox.ac.uk', 'cam.ac.uk', 'nasa.gov', 'cdc.gov', 'nih.gov', 'un.org'
         ];
         
-        // Expanded Satirical Domains
         const satiricalDomains = [
             'theonion.com', 'babylonbee.com', 'clickhole.com', 'duffelblog.com', 'reductress.com', 'waterfordwhispersnews.com',
             'thehardtimes.net', 'borowitzreport.com', 'chaser.com.au', 'theshovel.com.au', 'dailyer.com'
         ];
         
-        // Massively Expanded URL Shorteners
+        // NEW: User Generated Content Platforms (Mixed Reliability)
+        const ugcPlatforms = [
+            'facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'youtube.com', 'tiktok.com',
+            'reddit.com', 'medium.com', 'substack.com', 'wordpress.com', 'blogspot.com',
+            'linkedin.com', 'github.com', 'stackoverflow.com', 'quora.com'
+        ];
+
         const urlShorteners = [
             'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd', 'buff.ly', 'adf.ly', 'bit.do', 'lc.chat',
             'soo.gd', 's2r.co', 'clicky.me', 'budurl.com', 'cutt.ly', 'shorturl.at', 'rb.gy', 'shorte.st', 'x.co', 'v.gd'
         ];
 
-        // Expanded Dictionaries for true realism
         const lexicons = {
             clickbait: [
                 "you won't believe", "shocking", "this one trick", "what happens next", "mind-blowing", 
@@ -698,7 +757,6 @@
             return array.filter(phrase => new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(text));
         }
 
-        // --- UPGRADED URL PARSER ---
         function extractDomainData(urlInput) {
             let cleanedUrl = urlInput.trim().toLowerCase();
             if (!cleanedUrl.startsWith('http')) cleanedUrl = 'http://' + cleanedUrl;
@@ -730,22 +788,42 @@
             }
 
             if (sourceUrl) {
+                const cleanUrlForRegex = sourceUrl.trim().toLowerCase();
                 const domainData = extractDomainData(sourceUrl);
+                
+                // RED FLAG: INSECURE HTTP CHECK
+                if (cleanUrlForRegex.startsWith('http://')) {
+                    data.sourceScore -= 40;
+                    data.customVerdict = "Insecure Connection (HTTP)";
+                    data.suggestions.push({ text: "URL uses unencrypted HTTP. Do not submit sensitive data.", pts: "+40", type: "warning" });
+                    data.auditLog.push({ type: 'negative', text: 'Unencrypted HTTP protocol detected. Connection is vulnerable to interception.' });
+                }
+
                 if (domainData.valid) {
                     if (tldWeights[domainData.tld] !== undefined) {
                         let weight = tldWeights[domainData.tld];
                         data.sourceScore += weight;
                         if (weight > 0) data.auditLog.push({ type: 'positive', text: `Domain TLD (${domainData.tld}) recognized as structurally authoritative.` });
                         if (weight < 0) {
-                            data.suggestions.push({ text: `Low-tier TLD detected (${domainData.tld}). Upgrade to a .com, .edu, or .in.`, pts: `+${Math.abs(weight)}`, type: "warning" });
+                            data.suggestions.push({ text: `Low-tier TLD detected (${domainData.tld}). Upgrade to a .com, .edu, or .gov.`, pts: `+${Math.abs(weight)}`, type: "warning" });
                             data.auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with spam networks.` });
                         }
                     }
                     
-                    // Fixed: Uses .some() so 'xyz.bit.ly' correctly triggers the 'bit.ly' flag
+                    // RED FLAG: RANDOM NUMBERS / TYPOSQUATTING
+                    if (/\d{3,}/.test(domainData.hostname)) {
+                        data.sourceScore -= 30;
+                        data.auditLog.push({ type: 'negative', text: 'Suspicious domain syntax: Random consecutive numbers detected (e.g., news1234.com).' });
+                    }
+                    if (/[a-z]0[a-z]|[a-z]1[a-z]/i.test(domainData.hostname)) {
+                        data.sourceScore -= 20;
+                        data.auditLog.push({ type: 'warning', text: 'Potential typosquatting detected (using numbers to mimic letters).' });
+                    }
+
                     const isTrusted = trustedDomains.some(t => domainData.hostname === t || domainData.hostname.endsWith('.' + t));
                     const isSatirical = satiricalDomains.some(s => domainData.hostname === s || domainData.hostname.endsWith('.' + s));
                     const isShortener = urlShorteners.some(sh => domainData.hostname === sh || domainData.hostname.endsWith('.' + sh));
+                    const isUGC = ugcPlatforms.some(p => domainData.hostname === p || domainData.hostname.endsWith('.' + p));
 
                     if (isTrusted) { 
                         data.sourceScore = 95; 
@@ -759,6 +837,11 @@
                         data.customVerdict = "Masked URL (High Risk)";
                         data.suggestions.push({ text: "URL shortener detected. Use the direct link to establish transparency.", pts: "+30", type: "warning" });
                         data.auditLog.push({ type: 'negative', text: 'URL shortener or sub-domain masked redirect detected. True destination hidden.' }); 
+                    } else if (isUGC) {
+                        // NEW: UGC LOGIC
+                        data.sourceScore = 45;
+                        data.auditLog.push({ type: 'warning', text: 'Source is a User-Generated Content platform (Social Media/Blog). Credibility relies entirely on the individual author.' });
+                        data.suggestions.push({ text: "Provide primary sources rather than social media links.", pts: "+30", type: "warning" });
                     }
                 }
             } else {
@@ -959,6 +1042,14 @@
             const header = document.getElementById("reasoningHeader");
             list.classList.toggle("open");
             header.classList.toggle("open");
+        }
+
+        // --- CHANGELOG TOGGLE ---
+        function toggleChangelog() {
+            const box = document.getElementById("changelogBox");
+            const btn = document.getElementById("versionBtn");
+            box.classList.toggle("open");
+            btn.classList.toggle("open");
         }
 
         function animateBar(id, value, color) {
