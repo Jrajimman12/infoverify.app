@@ -103,7 +103,7 @@
         
         button.run-btn { width: 100%; background: linear-gradient(135deg, var(--accent-primary), #324fc7); color: white; border: none; padding: 18px; font-size: 16px; font-weight: 600; border-radius: 12px; cursor: pointer; transition: transform 0.5s var(--ease-spring), box-shadow 0.5s var(--ease-expo), filter 0.5s var(--ease-expo); margin-top: 10px; box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2); position: relative; overflow: hidden; }
         button.run-btn:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 15px 35px rgba(67, 97, 238, 0.5); filter: brightness(1.15); }
-        button.run-btn:active { transform: translateY(2px) scale(0.97); box-shadow: 0 5px 10px rgba(67, 97, 238, 0.4); filter: brightness(0.9); transition: all 0.1s ease; } /* Quick snap on click */
+        button.run-btn:active { transform: translateY(2px) scale(0.97); box-shadow: 0 5px 10px rgba(67, 97, 238, 0.4); filter: brightness(0.9); transition: all 0.1s ease; }
 
         /* --- LOADER & RESULTS --- */
         .loader-container { display: none; text-align: center; margin-top: 40px; padding: 20px 0; animation: fadeIn 0.6s var(--ease-expo); }
@@ -131,7 +131,6 @@
         .reasoning-header i.toggle-icon { transition: transform 0.6s var(--ease-spring); }
         .reasoning-header.open i.toggle-icon { transform: rotate(180deg); color: var(--accent-primary); }
         
-        /* The CSS Grid Trick for perfect smooth expanding */
         .smooth-expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.6s var(--ease-expo); }
         .smooth-expand.open { grid-template-rows: 1fr; }
         
@@ -282,6 +281,29 @@
         .team-role { font-family: var(--font-code); color: var(--accent-primary); font-size: 13px; margin-bottom: 20px; letter-spacing: 0.5px; }
         .team-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; max-width: 500px; margin: 0 auto; }
 
+        /* VERSION INDICATOR */
+        .version-indicator {
+            margin-top: 35px;
+            font-family: var(--font-code);
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            background: rgba(255,255,255,0.02);
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 100px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .version-indicator .version-highlight {
+            color: var(--accent-primary);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(67, 97, 238, 0.4);
+        }
+        .version-indicator i {
+            color: var(--safe);
+            margin-left: 5px;
+        }
+
         @media (max-width: 1000px) { .mega-guardian { display: none; } }
         @media (max-width: 768px) { .nav-links { display: none; } }
     </style>
@@ -298,7 +320,7 @@
 
     <section id="home">
         <div class="hero-section">
-            <div class="tagline">NLP-Powered Engine v5.5</div>
+            <div class="tagline">NLP-Powered Engine v6.0.0</div>
             <h1>Verify the Truth in Milliseconds.</h1>
             <p>Analyze linguistic topologies, verify source reputations, and detect clickbait manipulation before you share.</p>
         </div>
@@ -473,6 +495,10 @@
         <div style="margin-top: 40px; font-size: 12px; color: #555;">
             &copy; 2026 InfoVerify Systems. All rights reserved.
         </div>
+        
+        <div class="version-indicator">
+            Engine Version: <span class="version-highlight">v6.0.0_STABLE</span> (Up to date) <i class="fa-solid fa-circle-check"></i>
+        </div>
     </footer>
 
     <script>
@@ -494,7 +520,6 @@
             
             document.querySelectorAll('.credit-badge').forEach(b => b.classList.remove('active-badge'));
             
-            // If clicking the same open button, close it softly.
             if (activeMember === member) { 
                 container.classList.remove('active'); 
                 activeMember = null; 
@@ -505,7 +530,6 @@
             document.getElementById(`badge-${member}`).classList.add('active-badge');
             
             if (container.classList.contains('active')) {
-                // Liquid Fade-Swap for open cards
                 isSwitching = true;
                 cardContent.classList.add('switching-out');
                 
@@ -521,7 +545,6 @@
                 }, 400); 
                 
             } else {
-                // First open
                 updateCardUI(data);
                 container.classList.add('active');
                 setTimeout(() => { container.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);
@@ -554,12 +577,30 @@
             }
         });
 
-        // --- CORE ALGORITHM DATA ---
+        // --- CORE ALGORITHM DATA (MASSIVELY UPGRADED) ---
         const tldWeights = { '.gov': 45, '.edu': 40, '.ac.in': 45, '.in': 30, '.org': 15, '.int': 20, '.com': 0, '.net': 0, '.co.uk': 5, '.xyz': -20, '.co': -10, '.info': -15, '.biz': -20, '.top': -35, '.click': -40 };
-        const trustedDomains = ['bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int', 'drmgrdu.ac.in'];
-        const satiricalDomains = ['theonion.com', 'babylonbee.com', 'clickhole.com'];
-        const urlShorteners = ['bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd'];
+        
+        // Vastly expanded trusted domains list
+        const trustedDomains = [
+            'bbc.com', 'reuters.com', 'apnews.com', 'npr.org', 'bloomberg.com', 'wsj.com', 'nature.com', 'who.int', 'drmgrdu.ac.in',
+            'nytimes.com', 'washingtonpost.com', 'theguardian.com', 'cnn.com', 'foxnews.com', 'nbcnews.com', 'cbsnews.com', 
+            'abcnews.go.com', 'aljazeera.com', 'ft.com', 'economist.com', 'forbes.com', 'nationalgeographic.com', 'scientificamerican.com',
+            'harvard.edu', 'mit.edu', 'stanford.edu', 'ox.ac.uk', 'cam.ac.uk', 'nasa.gov', 'cdc.gov', 'nih.gov', 'un.org'
+        ];
+        
+        // Expanded Satirical Domains
+        const satiricalDomains = [
+            'theonion.com', 'babylonbee.com', 'clickhole.com', 'duffelblog.com', 'reductress.com', 'waterfordwhispersnews.com',
+            'thehardtimes.net', 'borowitzreport.com', 'chaser.com.au', 'theshovel.com.au', 'dailyer.com'
+        ];
+        
+        // Massively Expanded URL Shorteners
+        const urlShorteners = [
+            'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd', 'buff.ly', 'adf.ly', 'bit.do', 'lc.chat',
+            'soo.gd', 's2r.co', 'clicky.me', 'budurl.com', 'cutt.ly', 'shorturl.at', 'rb.gy', 'shorte.st', 'x.co', 'v.gd'
+        ];
 
+        // Expanded Dictionaries for true realism
         const lexicons = {
             clickbait: [
                 "you won't believe", "shocking", "this one trick", "what happens next", "mind-blowing", 
@@ -582,7 +623,9 @@
                 "are you making this mistake", "the silent killer", "banned video", "deleted tweet",
                 "what the media isn't showing", "the conspiracy", "cover-up", "they lied", "we were wrong",
                 "the shocking truth", "the ugly truth", "brace yourself", "prepare yourself", "insider reveals",
-                "whistleblower", "unsolved mystery", "bizarre discovery", "unexplained phenomenon"
+                "whistleblower", "unsolved mystery", "bizarre discovery", "unexplained phenomenon",
+                "you are being lied to", "this changes everything", "before it gets deleted",
+                "what happens when", "they are hiding this", "the disturbing truth", "creepy details"
             ],
             urgency: [
                 "act now", "hurry", "limited time", "before it's deleted", "warning", "urgent", 
@@ -597,7 +640,8 @@
                 "final notice", "live coverage", "evacuate", "take cover", "seek shelter", "code red",
                 "code black", "standby", "prepare for impact", "do not wait", "act fast", "hurry up",
                 "time-sensitive", "expiring", "last 24 hours", "last 48 hours", "midnight tonight",
-                "urgent recall", "safety hazard", "immediate threat", "vital information", "crucial update"
+                "urgent recall", "safety hazard", "immediate threat", "vital information", "crucial update",
+                "drop everything", "read this immediately", "this will be gone", "fast-acting", "rush"
             ],
             subjective: [
                 "terrible", "outrageous", "disgusting", "best", "worst", "absolute", "destroys", 
@@ -616,7 +660,8 @@
                 "unreal", "unimaginable", "inconceivable", "mind-boggling", "dumbfounding", "stupefying",
                 "marvelous", "miraculous", "wondrous", "astounding", "astonishing", "breathtaking",
                 "dreadful", "awful", "lousy", "poor", "mediocre", "subpar", "inferior", "worthless",
-                "valueless", "useless", "meaningless", "pointless", "futile", "fruitless", "vain"
+                "valueless", "useless", "meaningless", "pointless", "futile", "fruitless", "vain",
+                "sad", "depressing", "heartbreaking", "triumphant", "victorious", "crushing", "savage"
             ],
             objective: [
                 "reports", "stated", "officials", "according to", "announced", "data shows", 
@@ -643,7 +688,9 @@
                 "mandate", "directive", "legislation", "ordinance", "amendment", "treaty", "accord",
                 "pact", "convention", "summit", "plenary", "colloquium", "seminar", "workshop",
                 "doctoral", "postdoctoral", "thesis", "dissertation", "scholarly", "pedagogy",
-                "didactic", "curricula", "syllabus", "matriculation", "matriculated", "dean", "provost"
+                "didactic", "curricula", "syllabus", "matriculation", "matriculated", "dean", "provost",
+                "investigators", "prosecutors", "lawmakers", "senate", "congress", "parliament", "judiciary",
+                "ruling", "court documents", "filed", "litigation", "revenue reports", "quarterly growth"
             ]
         };
 
@@ -651,12 +698,13 @@
             return array.filter(phrase => new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(text));
         }
 
+        // --- UPGRADED URL PARSER ---
         function extractDomainData(urlInput) {
             let cleanedUrl = urlInput.trim().toLowerCase();
             if (!cleanedUrl.startsWith('http')) cleanedUrl = 'http://' + cleanedUrl;
             try {
                 const urlObj = new URL(cleanedUrl);
-                const hostname = urlObj.hostname.replace('www.', '');
+                const hostname = urlObj.hostname.replace(/^www\./, '');
                 const tldMatch = hostname.match(/\.[a-z]+(\.[a-z]+)?$/);
                 return { hostname, tld: tldMatch ? tldMatch[0] : '', valid: true };
             } catch (e) { return { hostname: urlInput, tld: '', valid: false }; }
@@ -693,18 +741,24 @@
                             data.auditLog.push({ type: 'negative', text: `Domain TLD (${domainData.tld}) is commonly associated with spam networks.` });
                         }
                     }
-                    if (trustedDomains.includes(domainData.hostname)) { 
+                    
+                    // Fixed: Uses .some() so 'xyz.bit.ly' correctly triggers the 'bit.ly' flag
+                    const isTrusted = trustedDomains.some(t => domainData.hostname === t || domainData.hostname.endsWith('.' + t));
+                    const isSatirical = satiricalDomains.some(s => domainData.hostname === s || domainData.hostname.endsWith('.' + s));
+                    const isShortener = urlShorteners.some(sh => domainData.hostname === sh || domainData.hostname.endsWith('.' + sh));
+
+                    if (isTrusted) { 
                         data.sourceScore = 95; 
                         data.auditLog.push({ type: 'positive', text: 'Source verified against the Global Trusted Ledger.' }); 
-                    } else if (satiricalDomains.includes(domainData.hostname)) { 
+                    } else if (isSatirical) { 
                         data.sourceScore = 15; 
                         data.customVerdict = "Known Satire / Parody";
                         data.auditLog.push({ type: 'neutral', text: 'Source identified as a known Satire/Parody network.' }); 
-                    } else if (urlShorteners.includes(domainData.hostname)) { 
+                    } else if (isShortener) { 
                         data.sourceScore = 20; 
                         data.customVerdict = "Masked URL (High Risk)";
                         data.suggestions.push({ text: "URL shortener detected. Use the direct link to establish transparency.", pts: "+30", type: "warning" });
-                        data.auditLog.push({ type: 'negative', text: 'URL shortener detected. True destination is masked.' }); 
+                        data.auditLog.push({ type: 'negative', text: 'URL shortener or sub-domain masked redirect detected. True destination hidden.' }); 
                     }
                 }
             } else {
@@ -838,7 +892,6 @@
             document.getElementById("analyzeBtn").style.display = "none";
             document.getElementById("results").style.display = "none";
             
-            // Smoothly collapse the reasoning box if it was open from a previous scan
             const logList = document.getElementById("reasoningList");
             const logHeader = document.getElementById("reasoningHeader");
             logList.classList.remove("open");
